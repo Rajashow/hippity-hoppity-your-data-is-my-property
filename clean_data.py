@@ -20,8 +20,8 @@ def tidy_data(data):
 def get_train_test_split_for_ml(data, split_year, return_encoder=False):
     data = data.copy()
     # create train test spilt
-    train_data = data.query(f"FIRST_PAYMENT_YEAR<= split_year")
-    test_data = data.query(f"FIRST_PAYMENT_YEAR >  split_year")
+    train_data = data.query(f"FIRST_PAYMENT_YEAR<= {split_year}")
+    test_data = data.query(f"FIRST_PAYMENT_YEAR >  {split_year}")
 
     # fill missing data based on train data for train and test
     fill_numeric(train_data, test_data)

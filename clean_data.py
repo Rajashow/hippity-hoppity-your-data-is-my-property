@@ -1,18 +1,21 @@
-import pandas as pd
+import warnings
 from sklearn.preprocessing import OneHotEncoder
+import pandas as pd
+
+pd.options.mode.chained_assignment = None
 
 
 def tidy_data(data):
 
     data = data.copy()
-
-    data["MATURITY_YEAR"] = data.MATURITY_DATE//100
-    data["MATURITY_MON"] = data.MATURITY_DATE % 100
-    data.drop("MATURITY_DATE", inplace=True, axis=1)
-
-    data["FIRST_PAYMENT_YEAR"] = data.FIRST_PAYMENT_DATE//100
-    data["FIRST_PAYMENT_MON"] = data.FIRST_PAYMENT_DATE % 100
-    data.drop("FIRST_PAYMENT_DATE", inplace=True, axis=1)
+    if "MATURITY_DATE" in data:
+        data["MATURITY_YEAR"] = data.MATURITY_DATE//100
+        data["MATURITY_MON"] = data.MATURITY_DATE % 100
+        data.drop("MATURITY_DATE", inplace=True, axis=1)
+    if "FIRST_PAYMENT_DATE" in data:
+        data["FIRST_PAYMENT_YEAR"] = data.FIRST_PAYMENT_DATE//100
+        data["FIRST_PAYMENT_MON"] = data.FIRST_PAYMENT_DATE % 100
+        data.drop("FIRST_PAYMENT_DATE", inplace=True, axis=1)
 
     return data
 
@@ -20,8 +23,8 @@ def tidy_data(data):
 def get_train_test_split_for_ml(data, split_year, return_encoder=False):
     data = data.copy()
     # create train test spilt
-    train_data = data.query(f"FIRST_PAYMENT_YEAR<= split_year")
-    test_data = data.query(f"FIRST_PAYMENT_YEAR >  split_year")
+    train_data = data.query(f"FIRST_PAYMENT_YEAR<= {split_year}")
+    test_data = data.query(f"FIRST_PAYMENT_YEAR >  {split_year}")
 
     # fill missing data based on train data for train and test
     fill_numeric(train_data, test_data)
@@ -33,7 +36,7 @@ def get_train_test_split_for_ml(data, split_year, return_encoder=False):
     filled_cat_train_data = train_data.select_dtypes(["category", "object"])
 
     # create a one encoder based on train data
-    encoder = OneHotEncoder()
+    encoder = OneHotEncoder(handle_unknown='ignore')
     encoder.fit(filled_cat_train_data)
 
     # convert all categorical data to dummies for train
@@ -99,6 +102,13 @@ def fill_cat(train, test):
     train.PROPERTY_TYPE.fillna(fill, inplace=True)
     test["Missing_PROPERTY_TYPE"] = test.PROPERTY_TYPE.isna()
     test.PROPERTY_TYPE.fillna(fill, inplace=True)
+
+    # fill PROPERTY_TYPE
+    fill = train.NUMBER_OF_UNITS.mode()[0]
+    train["Missing_NUMBER_OF_UNITS"] = train.NUMBER_OF_UNITS.isna()
+    train.NUMBER_OF_UNITS.fillna(fill, inplace=True)
+    test["Missing_NUMBER_OF_UNITS"] = test.NUMBER_OF_UNITS.isna()
+    test.NUMBER_OF_UNITS.fillna(fill, inplace=True)
 
 
 def fill_numeric(train, test):

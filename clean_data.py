@@ -27,6 +27,28 @@ def clean_data(train_data, test_data):
 
 
 def get_train_test_split_for_ml(data, split_year, return_encoder=False, pre_process=False):
+    """
+    Get a train and test set based on the spilt year. The function does not modify the dataframe
+    and returns a copy.
+
+
+    Arguments:
+
+    - data {pd.Dataframe} -- Datafame with all of the data, that you want to split
+
+    - split_year {int} -- year that you want to split on
+
+    Keyword Arguments:
+
+    - return_encoder {bool} -- return the One hot encoder that was trained on the train
+    and test (default: {False})
+
+    - pre_process {bool} -- clean and fill the data (default: {False})
+
+    Returns:
+
+    - [tuple] -- return a (train dataframe, test dataframe, encoder or None) tuple.
+    """
     data = data.copy()
     # create train test spilt
     train_data = data.query(f"FIRST_PAYMENT_YEAR<= {split_year}")

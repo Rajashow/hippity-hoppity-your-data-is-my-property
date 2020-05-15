@@ -1,4 +1,9 @@
-from IPython.display import HTML
+from IPython.display import HTML, display
+
+
+def center_output():
+    display(HTML(
+        r"""<style>.output { align-items: center;   }    </style>"""))
 
 
 def code_button():
